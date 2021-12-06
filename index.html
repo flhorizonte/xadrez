@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        *{
+            -webkit-user-select: none;  
+            -moz-user-select: none;    
+            -ms-user-select: none;      
+            user-select: none;
+        }
+        #tabuleiro {
+            width: 750px;
+            height: 750px;
+            border: 1px solid #000;
+            float:left;
+            
+        }
+        #output {
+            width: 450px;
+            height: 750px;
+            border: 1px solid #000;
+            float:left;
+        }
+        .row {
+            width: 100%;
+            float: left;
+            display: flex;
+        }
+        #tabuleiro  .square {
+            width: 75px;
+            height: 75px;
+        }
+
+        .preta {
+            background-color: darkseagreen;
+            color: white;
+        }
+
+        .branca {
+            background-color: white;
+            color: black;
+        }
+
+        .img_peca {
+            width: 100%;
+            height: 100%;
+        }
+
+        .square {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        
+    </style>
+    
+        
+    <title>Xadrez</title>
+</head>
+    <div id="tabuleiro"></div>
+    <div id="output"></div>
+
+    <script type="text/javascript">
+
+        let html = ''
+        const jogadas = [];
+
+        document.addEventListener("dragstart", event => {
+            dragged = event.target;
+            event.target.style.opacity = 5;
+        }, false);
+
+        document.addEventListener("dragover", event => {
+            event.preventDefault()
+        }, false);
+
+        document.addEventListener("dragenter", event => {
+            if(event.target.id == "dragzone") {
+                event.target.style.background = "dark";
+            }
+        }, false);
+        
+        document.addEventListener("drop", event => {
+            event.preventDefault();
+            
+            if(event.target.id == "dragzone") {
+
+                const posicao = event.target.className.split(' ')[1];
+                const cor_peca = event.target.className.split(' ')[2];
+
+                dragged.parentNode.removeChild( dragged );
+                event.target.appendChild( dragged );
+
+                jogada(posicao, cor_peca)
+            }
+        }, false)
+
+        const pecas = {
+            brancas: [
+                    {
+                        nome: 'peao',
+                        img: './brancas/p.png',
+                        starter: ['2a', '2b', '2c', '2d', '2e', '2f', '2g', '2h'] //posição de inicio da peça
+                    },
+            ],
+            pretas: [
+                    {
+                        nome: 'peao',
+                        img: './pretas/p.png',
+                        starter: ['7a', '7b', '7c', '7d', '7e', '7f', '7g', '7h'] //posição de inicio da peça
+                    },
+                    {
+                        nome: 'cavalo',
+                        img: './pretas/bn.png',
+                        starter: ['8b', '8g'] //posição de inicio da peça
+                    },
+                    {
+                        nome: 'bispo',
+                        img: './pretas/bb.png',
+                        starter: ['8c', '8f'] //posição de inicio da peça
+                    },
+                    {
+                        nome: 'torre',
+                        img: './pretas/br.png',
+                        starter: ['8a', '8h'] //posição de inicio da peça
+                    },
+                    {
+                        nome: 'rainha',
+                        img: './pretas/bq.png',
+                        starter: ['8d'] //posição de inicio da peça
+                    },
+                    {
+                        nome: 'rei',
+                        img: './pretas/bk.png',
+                        starter: ['8e'] //posição de inicio da peça
+                    },
+                    
+            ]
+        }
+
+    
+        gerarTabuleiro()
+
+        //melhorar logica futuramente
+        function gerarTabuleiro() {
+            //9x9
+            let letters = 'abcdefgh';
+            let html = '';
+            let row = 0;
+
+            for (let linha = 8; linha >= 1; linha--) {
+                html += '<div class="row">';
+
+                let count = 0;
+                let second = 1;
+
+                for(let coluna = 0; coluna < 8; coluna++) {
+                    if(count > 0) {
+                        count--;
+                    } else {
+                        count++;
+                    }
+                    if(second < 1) {
+                        second++;
+                    } else {
+                        second--;
+                    }
+                    
+                    html += getSquare(linha, `${letters[coluna]}`, row ? second : count);                    
+                }
+            
+                html += '</div>'
+
+                if(row > 0) {
+                    row--;
+                } else {
+                    row++;
+                }    
+            }
+            document.getElementById('tabuleiro').innerHTML = html;
+        }
+
+        function getSquare(linha, coluna, boolean) {
+            let linha_coluna = `${linha}${coluna}`;
+
+            let square = `<div id="dragzone" class='square ${linha_coluna} ${boolean ? 'branca' : 'preta'}'>
+                <b><small style="position: absolute; left:10%; top:10%">${linha}${coluna}</small></b>`;
+
+            
+            for (let peca of pecas.brancas) {
+                for (let posi of peca.starter) {
+                    if(posi === linha_coluna) {
+                        square += `<img draggable="true" id="peca_branca" class="img_peca bispo" src="${peca.img}">`;
+                    }
+                }
+            }
+
+            for (let peca of pecas.pretas) {
+                for (let posi of peca.starter) {
+                    if(posi === linha_coluna) {
+                        square += `<img class="img_peca" id="peca_preta" src="${peca.img}">`;
+                    }
+                }
+            }
+
+            square += '</div>';
+
+            return square;
+        
+            //se for encontrado linha e coluna nas posicoes de uma peça, a pela sera adicionada na caixa
+        }
+
+        function jogada(posicao, peca, nome) {
+
+            console.log(posicao, peca, nome)
+        }
+    </script>
+</body>
+</html>
